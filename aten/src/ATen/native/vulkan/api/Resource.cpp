@@ -241,7 +241,14 @@ Resource::Pool::~Pool() {
   try {
     purge();
   }
+  catch (const std::exception& e) {
+    LOG(WARNING)
+        << "Vulkan: Resource pool destructor raised an exception!  Error: "
+        << e.what();
+  }
   catch (...) {
+    LOG(WARNING)
+        << "Vulkan: Resource pool destructor raised an unknown exception!";
   }
 }
 
@@ -473,6 +480,18 @@ void Resource::Pool::purge() {
   fence_.in_use = 0u;
   image_.pool.clear();
   buffer_.pool.clear();
+}
+
+void Resource::Pool::release(const Buffer& buffer) {
+  release_buffer(buffer);
+}
+
+void Resource::Pool::release(const Image& image) {
+  release_image(image);
+}
+
+void Resource::Pool:release(const Fence& fence) {
+  fence.wait();
 }
 
 } // namespace api
